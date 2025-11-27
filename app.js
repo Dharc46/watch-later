@@ -7,9 +7,32 @@ const listEl = document.getElementById("movie-list");
 const emptyStateEl = document.getElementById("empty-state");
 const countEl = document.getElementById("movie-count");
 const template = document.getElementById("movie-row-template");
+const STORAGE_KEY = "watchLaterMovies";
 
 const state = {
     movies: [],
+};
+
+const persistState = () => {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.movies));
+    } catch (error) {
+        console.error("Không thể lưu dữ liệu vào localStorage", error);
+    }
+};
+
+const hydrateState = () => {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+            state.movies = parsed.filter((item) => typeof item === "string");
+            sortMovies();
+        }
+    } catch (error) {
+        console.error("Không thể đọc dữ liệu từ localStorage", error);
+    }
 };
 
 const normalizeTitle = (title) => title.trim().replace(/\s+/g, " ").toLowerCase();
@@ -58,6 +81,7 @@ const addMovie = (title, { silent = false } = {}) => {
     state.movies.push(cleaned);
     sortMovies();
     renderList();
+    persistState();
 
     if (!silent) setFeedback("Đã thêm thành công!", "success");
     return { status: "added" };
@@ -68,6 +92,7 @@ const removeMovie = (title) => {
     if (index === -1) return;
     state.movies.splice(index, 1);
     renderList();
+    persistState();
 };
 
 const setFeedback = (message, type) => {
@@ -105,4 +130,5 @@ listEl.addEventListener("click", (event) => {
     }
 });
 
+hydrateState();
 renderList();
