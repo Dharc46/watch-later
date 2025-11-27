@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Watch Later</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <main class="app">
+        <header>
+            <div>
+                <p class="eyebrow">Danh sách của bạn</p>
+                <h1>Watch Later</h1>
+                <p class="lead">Nhập phim muốn xem sau, chúng tôi sẽ tự động sắp xếp theo thứ tự chữ cái.</p>
+            </div>
+        </header>
+
+        <section class="card">
+            <h2>Thêm nhanh</h2>
+            <form id="single-form" class="stack" autocomplete="off">
+                <label for="single-input">Tên phim</label>
+                <div class="row">
+                    <input id="single-input" name="single" type="text" placeholder="Ví dụ: The Matrix" required />
+                    <button type="submit">Thêm</button>
+                </div>
+                <p id="single-feedback" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Nhập nhiều</h2>
+            <form id="bulk-form" class="stack">
+                <label for="bulk-input">Nhập mỗi dòng một phim hoặc ngăn cách bằng dấu phẩy.</label>
+                <textarea id="bulk-input" name="bulk" rows="5" placeholder="Breaking Bad\nSpirited Away\nInception"></textarea>
+                <div class="row">
+                    <button type="submit">Thêm tất cả</button>
+                    <span class="subtle">* Không hiện thông báo, các phim trùng sẽ tự bỏ qua.</span>
+                </div>
+            </form>
+        </section>
+
+        <section class="card list-card">
+            <div class="list-header">
+                <h2>Danh sách phim</h2>
+                <p class="count"><span id="movie-count">0</span> phim</p>
+            </div>
+            <div id="empty-state" class="empty">Chưa có phim nào, hãy thêm phim đầu tiên!</div>
+            <ul id="movie-list"></ul>
+        </section>
+    </main>
+
+    <template id="movie-row-template">
+        <li class="movie-row">
+            <span class="index"></span>
+            <span class="title"></span>
+            <button class="delete" type="button" aria-label="Xóa phim">
+                <span aria-hidden="true">×</span>
+            </button>
+        </li>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>
