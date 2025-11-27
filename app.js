@@ -9,6 +9,18 @@ const countEl = document.getElementById("movie-count");
 const template = document.getElementById("movie-row-template");
 const STORAGE_KEY = "watchLaterMovies";
 
+const collapseSpaces = (text) => text.trim().replace(/\s+/g, " ");
+
+const toTitleCase = (text) =>
+    collapseSpaces(text)
+        .split(" ")
+        .map((word) =>
+            word
+                ? word.slice(0, 1).toLocaleUpperCase("vi-VN") + word.slice(1).toLocaleLowerCase("vi-VN")
+                : ""
+        )
+        .join(" ");
+
 const state = {
     movies: [],
 };
@@ -27,7 +39,9 @@ const hydrateState = () => {
         if (!raw) return;
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-            state.movies = parsed.filter((item) => typeof item === "string");
+            state.movies = parsed
+                .filter((item) => typeof item === "string")
+                .map((item) => toTitleCase(item));
             sortMovies();
         }
     } catch (error) {
@@ -35,7 +49,7 @@ const hydrateState = () => {
     }
 };
 
-const normalizeTitle = (title) => title.trim().replace(/\s+/g, " ").toLowerCase();
+const normalizeTitle = (title) => collapseSpaces(title).toLocaleLowerCase("vi-VN");
 
 const sortMovies = () => {
     state.movies.sort((a, b) => a.localeCompare(b, "vi", { sensitivity: "base" }));
@@ -64,7 +78,7 @@ const renderList = () => {
 };
 
 const addMovie = (title, { silent = false } = {}) => {
-    const cleaned = title.trim();
+    const cleaned = collapseSpaces(title);
     if (!cleaned) {
         if (!silent) setFeedback("Vui lòng nhập tên phim.", "error");
         return { status: "empty" };
@@ -78,7 +92,8 @@ const addMovie = (title, { silent = false } = {}) => {
         return { status: "duplicate" };
     }
 
-    state.movies.push(cleaned);
+    const formatted = toTitleCase(cleaned);
+    state.movies.push(formatted);
     sortMovies();
     renderList();
     persistState();
