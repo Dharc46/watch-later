@@ -147,6 +147,21 @@ button:active {
     color: var(--danger);
 }
 
+#bulk-feedback {
+    min-height: 1.2rem;
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+#bulk-feedback.success {
+    color: #7dd87d;
+}
+
+#bulk-feedback.error {
+    color: var(--danger);
+}
+
 .list-card {
     padding: 0;
 }
