@@ -5,8 +5,9 @@ A simple and elegant web application for managing your movie watchlist. Keep tra
 ## Features ✨
 
 - **Quick Add**: Add movies one at a time with instant validation
-- **Bulk Import**: Add multiple movies at once (separated by new lines or commas)
+- **Bulk Import**: Add multiple movies at once (separated by new lines or commas) with a summary of what was added or skipped
 - **Smart Formatting**: Automatically formats movie titles to title case with proper Vietnamese locale support
+- **URL Cleanup**: Removes stray links from pasted text and can extract titles or IDs from supported links
 - **Duplicate Detection**: Prevents the same movie from being added twice
 - **Persistent Storage**: Your watchlist is saved automatically to browser localStorage
 - **Sorted List**: Movies are automatically sorted alphabetically
@@ -28,12 +29,19 @@ A simple and elegant web application for managing your movie watchlist. Keep tra
 2. Click the "Thêm" (Add) button or press Enter
 3. You'll see a confirmation message
 
+If you paste extra links in the same input, the app will try to clean them automatically before saving.
+
+Examples:
+
+- `https://nhentai.net/g/299334/` becomes `299334`
+- `https://vlogtruyen.net/toi-la-tan-thu-co-cap-cao-nhat/chapter-1-6103a887f8fac801c76971c5.html` becomes `Tôi Là Tân Thủ Có Cấp Cao Nhất`
+
 #### Multiple Movies
 
 1. Go to the "Nhập nhiều" (Bulk Import) section
 2. Paste or type multiple movie names, each on a new line or separated by commas
 3. Click "Thêm tất cả" (Add All) button
-4. Duplicates will be automatically skipped
+4. The app will show a short summary of how many items were added, skipped as duplicates, or ignored as empty entries
 
 ### Managing Your List
 
@@ -75,6 +83,8 @@ Works in all modern browsers:
 - Removes extra spaces automatically
 - Handles multiple whitespace properly
 - Converts to proper title case in Vietnamese
+- Cleans pasted URLs from mixed input
+- Extracts readable text from supported links when possible
 
 ### Duplicate Prevention
 
