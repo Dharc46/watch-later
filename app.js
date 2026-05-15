@@ -12,6 +12,13 @@ const STORAGE_KEY = "watchLaterMovies";
 
 const collapseSpaces = (text) => text.trim().replace(/\s+/g, " ");
 
+const slugToText = (slug) =>
+    collapseSpaces(
+        decodeURIComponent(slug)
+            .replace(/[-_]+/g, " ")
+            .replace(/\.+/g, " ")
+    );
+
 const extractUrlToken = (rawUrl) => {
     try {
         const normalizedUrl = rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`;
@@ -21,6 +28,13 @@ const extractUrlToken = (rawUrl) => {
         if (host === "nhentai.net") {
             const galleryMatch = parsedUrl.pathname.match(/^\/g\/(\d+)(?:\/|$)/i);
             if (galleryMatch) return galleryMatch[1];
+        }
+
+        if (host === "vlogtruyen.net") {
+            const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+            if (pathParts.length > 0) {
+                return slugToText(pathParts[0]);
+            }
         }
     } catch (error) {
         return "";
