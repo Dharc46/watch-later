@@ -112,6 +112,16 @@ textarea:focus {
 
 select {
     min-width: 140px;
+    background-color: rgba(20, 24, 33, 0.95);
+    color: var(--text);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+select option {
+    background: var(--card);
+    color: var(--text);
 }
 
 button {
@@ -219,12 +229,30 @@ button:active {
     padding: 6px 10px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border);
-    color: var(--muted);
+    border: 1px solid transparent;
+    color: var(--text);
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
+}
+
+.movie-row .tag.tag--game {
+    background: rgba(79, 140, 255, 0.18);
+    border-color: rgba(79, 140, 255, 0.4);
+    color: #9fc0ff;
+}
+
+.movie-row .tag.tag--movie {
+    background: rgba(125, 216, 125, 0.16);
+    border-color: rgba(125, 216, 125, 0.38);
+    color: #b7ecb7;
+}
+
+.movie-row .tag.tag--comic {
+    background: rgba(255, 192, 92, 0.18);
+    border-color: rgba(255, 192, 92, 0.42);
+    color: #ffd89a;
 }
 
 .movie-row button.delete {

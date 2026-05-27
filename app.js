@@ -154,7 +154,9 @@ const renderList = () => {
         const clone = template.content.firstElementChild.cloneNode(true);
         clone.querySelector(".index").textContent = idx + 1;
         clone.querySelector(".title").textContent = item.title;
-        clone.querySelector(".tag").textContent = formatTag(item.tag);
+        const tagEl = clone.querySelector(".tag");
+        tagEl.textContent = formatTag(item.tag);
+        tagEl.classList.add(`tag--${normalizeTag(item.tag)}`);
         const deleteBtn = clone.querySelector(".delete");
         deleteBtn.dataset.title = item.title;
         deleteBtn.dataset.tag = normalizeTag(item.tag);
