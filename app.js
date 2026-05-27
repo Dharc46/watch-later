@@ -9,8 +9,30 @@ const emptyStateEl = document.getElementById("empty-state");
 const countEl = document.getElementById("movie-count");
 const template = document.getElementById("movie-row-template");
 const STORAGE_KEY = "watchLaterMovies";
+const TAG_OPTIONS = [
+    { value: "game", label: "Game" },
+    { value: "movie", label: "Movie" },
+    { value: "comic", label: "Comic" },
+];
+const DEFAULT_TAG = "movie";
+const TAG_ORDER = {
+    game: 0,
+    movie: 1,
+    comic: 2,
+};
 
 const collapseSpaces = (text) => text.trim().replace(/\s+/g, " ");
+
+const normalizeTag = (tag) => {
+    const value = typeof tag === "string" ? tag.toLowerCase() : "";
+    return TAG_OPTIONS.some((option) => option.value === value) ? value : DEFAULT_TAG;
+};
+
+const formatTag = (tag) => {
+    const normalized = normalizeTag(tag);
+    const option = TAG_OPTIONS.find((item) => item.value === normalized);
+    return option ? option.label : "Movie";
+};
 
 const slugToText = (slug) =>
     collapseSpaces(
@@ -64,12 +86,12 @@ const toTitleCase = (text) =>
         .join(" ");
 
 const state = {
-    movies: [],
+    items: [],
 };
 
 const persistState = () => {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.movies));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
     } catch (error) {
         console.error("Không thể lưu dữ liệu vào localStorage", error);
     }
@@ -81,10 +103,25 @@ const hydrateState = () => {
         if (!raw) return;
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-            state.movies = parsed
-                .filter((item) => typeof item === "string")
-                .map((item) => toTitleCase(item));
-            sortMovies();
+            state.items = parsed
+                .map((item) => {
+                    if (typeof item === "string") {
+                        const title = toTitleCase(item);
+                        return title ? { title, tag: DEFAULT_TAG } : null;
+                    }
+
+                    if (!item || typeof item !== "object") return null;
+
+                    const title = typeof item.title === "string" ? toTitleCase(item.title) : "";
+                    if (!title) return null;
+
+                    return {
+                        title,
+                        tag: normalizeTag(item.tag),
+                    };
+                })
+                .filter(Boolean);
+            sortItems();
         }
     } catch (error) {
         console.error("Không thể đọc dữ liệu từ localStorage", error);
@@ -93,50 +130,60 @@ const hydrateState = () => {
 
 const normalizeTitle = (title) => sanitizeInput(title).toLocaleLowerCase("vi-VN");
 
-const sortMovies = () => {
-    state.movies.sort((a, b) => a.localeCompare(b, "vi", { sensitivity: "base" }));
+const sortItems = () => {
+    state.items.sort((a, b) => {
+        const titleResult = a.title.localeCompare(b.title, "vi", { sensitivity: "base" });
+        if (titleResult !== 0) return titleResult;
+        return TAG_ORDER[a.tag] - TAG_ORDER[b.tag];
+    });
 };
 
 const renderList = () => {
     listEl.innerHTML = "";
 
-    if (state.movies.length === 0) {
+    if (state.items.length === 0) {
         emptyStateEl.hidden = false;
         countEl.textContent = "0";
         return;
     }
 
     emptyStateEl.hidden = true;
-    countEl.textContent = state.movies.length.toString();
+    countEl.textContent = state.items.length.toString();
 
-    state.movies.forEach((title, idx) => {
+    state.items.forEach((item, idx) => {
         const clone = template.content.firstElementChild.cloneNode(true);
         clone.querySelector(".index").textContent = idx + 1;
-        clone.querySelector(".title").textContent = title;
+        clone.querySelector(".title").textContent = item.title;
+        clone.querySelector(".tag").textContent = formatTag(item.tag);
         const deleteBtn = clone.querySelector(".delete");
-        deleteBtn.dataset.title = title;
+        deleteBtn.dataset.title = item.title;
+        deleteBtn.dataset.tag = normalizeTag(item.tag);
+        deleteBtn.setAttribute("aria-label", `Xóa ${formatTag(item.tag).toLowerCase()} ${item.title}`);
         listEl.appendChild(clone);
     });
 };
 
-const addMovie = (title, { silent = false } = {}) => {
+const addItem = (title, tag, { silent = false } = {}) => {
     const cleaned = sanitizeInput(title);
     if (!cleaned) {
-        if (!silent) setFeedback("Vui lòng nhập tên phim.", "error");
+        if (!silent) setFeedback("Vui lòng nhập tên mục.", "error");
         return { status: "empty" };
     }
 
+    const normalizedTag = normalizeTag(tag);
     const normalized = normalizeTitle(cleaned);
-    const exists = state.movies.some((movie) => normalizeTitle(movie) === normalized);
+    const exists = state.items.some(
+        (item) => normalizeTitle(item.title) === normalized && normalizeTag(item.tag) === normalizedTag
+    );
 
     if (exists) {
-        if (!silent) setFeedback("Phim đã có trong danh sách.", "error");
+        if (!silent) setFeedback("Mục này đã có trong danh sách.", "error");
         return { status: "duplicate" };
     }
 
     const formatted = toTitleCase(cleaned);
-    state.movies.push(formatted);
-    sortMovies();
+    state.items.push({ title: formatted, tag: normalizedTag });
+    sortItems();
     renderList();
     persistState();
 
@@ -149,13 +196,17 @@ const setBulkFeedback = (message, type) => {
     bulkFeedback.className = type ? type : "";
 };
 
-const removeMovie = (title) => {
-    const index = state.movies.findIndex((movie) => movie === title);
+const removeItem = (title, tag) => {
+    const index = state.items.findIndex(
+        (item) => item.title === title && normalizeTag(item.tag) === normalizeTag(tag)
+    );
     if (index === -1) return;
-    state.movies.splice(index, 1);
+    state.items.splice(index, 1);
     renderList();
     persistState();
 };
+
+const getSelectedTag = (selectId) => normalizeTag(document.getElementById(selectId).value);
 
 const setFeedback = (message, type) => {
     singleFeedback.textContent = message;
@@ -164,16 +215,17 @@ const setFeedback = (message, type) => {
 
 singleForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    addMovie(singleInput.value);
+    addItem(singleInput.value, getSelectedTag("single-tag"));
     singleInput.value = "";
 });
 
 bulkForm.addEventListener("submit", (event) => {
     event.preventDefault();
+    const bulkTag = getSelectedTag("bulk-tag");
     const raw = bulkInput.value;
     if (!raw.trim()) {
         bulkInput.value = "";
-        setBulkFeedback("Vui lòng nhập ít nhất một tên phim.", "error");
+        setBulkFeedback("Vui lòng nhập ít nhất một tên mục.", "error");
         return;
     }
 
@@ -193,7 +245,7 @@ bulkForm.addEventListener("submit", (event) => {
     let emptyCount = 0;
 
     entries.forEach((entry) => {
-        const result = addMovie(entry, { silent: true });
+        const result = addItem(entry, bulkTag, { silent: true });
         if (result.status === "added") addedCount += 1;
         if (result.status === "duplicate") duplicateCount += 1;
         if (result.status === "empty") emptyCount += 1;
@@ -202,12 +254,12 @@ bulkForm.addEventListener("submit", (event) => {
     bulkInput.value = "";
 
     if (addedCount === 0 && duplicateCount > 0) {
-        setBulkFeedback(`Không thêm phim mới nào. ${duplicateCount} mục đã có sẵn.`, "error");
+        setBulkFeedback(`Không thêm mục mới nào. ${duplicateCount} mục đã có sẵn.`, "error");
         return;
     }
 
     const parts = [];
-    if (addedCount > 0) parts.push(`Đã thêm ${addedCount} phim`);
+    if (addedCount > 0) parts.push(`Đã thêm ${addedCount} mục`);
     if (duplicateCount > 0) parts.push(`${duplicateCount} mục trùng đã bỏ qua`);
     if (emptyCount > 0) parts.push(`${emptyCount} mục rỗng đã bỏ qua`);
 
@@ -217,7 +269,7 @@ bulkForm.addEventListener("submit", (event) => {
 listEl.addEventListener("click", (event) => {
     if (event.target.closest("button.delete")) {
         const btn = event.target.closest("button.delete");
-        removeMovie(btn.dataset.title);
+        removeItem(btn.dataset.title, btn.dataset.tag);
     }
 });
 

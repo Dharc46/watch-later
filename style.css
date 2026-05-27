@@ -90,6 +90,7 @@ label {
 }
 
 input,
+select,
 textarea {
     flex: 1;
     border: 1px solid var(--border);
@@ -102,10 +103,15 @@ textarea {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
     outline: none;
     border-color: var(--accent);
     transform: translateY(-1px);
+}
+
+select {
+    min-width: 140px;
 }
 
 button {
@@ -187,7 +193,7 @@ button:active {
 
 .movie-row {
     display: grid;
-    grid-template-columns: 32px 1fr auto;
+    grid-template-columns: 32px minmax(0, 1fr) auto auto;
     gap: 16px;
     align-items: center;
     padding: 18px 24px;
@@ -206,6 +212,19 @@ button:active {
 .movie-row .title {
     font-size: 1rem;
     line-height: 1.4;
+}
+
+.movie-row .tag {
+    justify-self: end;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
 }
 
 .movie-row button.delete {
@@ -231,7 +250,7 @@ button:active {
     }
 
     .movie-row {
-        grid-template-columns: 24px 1fr auto;
+        grid-template-columns: 24px minmax(0, 1fr) auto auto;
         padding: 16px;
     }
 
@@ -241,5 +260,10 @@ button:active {
 
     .row {
         flex-direction: column;
+    }
+
+    select {
+        width: 100%;
+        min-width: 0;
     }
 }

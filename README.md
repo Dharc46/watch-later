@@ -1,14 +1,14 @@
-# Watch Later 🎬
+# Danh sách chờ 🎬
 
-A simple and elegant web application for managing your movie watchlist. Keep track of all the movies you want to watch with a clean, user-friendly interface.
+A simple and elegant web application for managing your game, movie, and comic backlog. Keep track of everything you want to enjoy later with a clean, user-friendly interface.
 
 ## Features ✨
 
-- **Quick Add**: Add movies one at a time with instant validation
-- **Bulk Import**: Add multiple movies at once (separated by new lines or commas) with a summary of what was added or skipped
-- **Smart Formatting**: Automatically formats movie titles to title case with proper Vietnamese locale support
+- **Quick Add**: Add items one at a time with instant validation and a tag selector
+- **Bulk Import**: Add multiple items at once (separated by new lines or commas) with a summary of what was added or skipped
+- **Smart Formatting**: Automatically formats item titles to title case with proper Vietnamese locale support
 - **URL Cleanup**: Removes stray links from pasted text and can extract titles or IDs from supported links
-- **Duplicate Detection**: Prevents the same movie from being added twice
+- **Duplicate Detection**: Prevents the same item with the same tag from being added twice
 - **Persistent Storage**: Your watchlist is saved automatically to browser localStorage
 - **Sorted List**: Movies are automatically sorted alphabetically
 - **Dark Theme**: Modern dark UI with smooth gradients
@@ -19,15 +19,16 @@ A simple and elegant web application for managing your movie watchlist. Keep tra
 
 1. **Clone or download** this repository to your local machine
 2. **Open** `index.html` in your web browser
-3. **Start adding movies!**
+3. **Start adding items!**
 
 ### Adding Movies
 
-#### Single Movie
+#### Single Item
 
-1. Enter the movie name in the "Thêm nhanh" (Quick Add) field
+1. Enter the item name in the "Thêm nhanh" (Quick Add) field
 2. Click the "Thêm" (Add) button or press Enter
-3. You'll see a confirmation message
+3. Pick a tag: Game, Movie, or Comic
+4. You'll see a confirmation message
 
 If you paste extra links in the same input, the app will try to clean them automatically before saving.
 
@@ -36,17 +37,18 @@ Examples:
 - `https://nhentai.net/g/299334/` becomes `299334`
 - `https://vlogtruyen.net/toi-la-tan-thu-co-cap-cao-nhat/chapter-1-6103a887f8fac801c76971c5.html` becomes `Tôi Là Tân Thủ Có Cấp Cao Nhất`
 
-#### Multiple Movies
+#### Multiple Items
 
 1. Go to the "Nhập nhiều" (Bulk Import) section
-2. Paste or type multiple movie names, each on a new line or separated by commas
-3. Click "Thêm tất cả" (Add All) button
-4. The app will show a short summary of how many items were added, skipped as duplicates, or ignored as empty entries
+2. Paste or type multiple item names, each on a new line or separated by commas
+3. Choose one tag for the whole batch
+4. Click "Thêm tất cả" (Add All) button
+5. The app will show a short summary of how many items were added, skipped as duplicates, or ignored as empty entries
 
 ### Managing Your List
 
-- View your complete movie list with an automatic count
-- Click the "×" button next to any movie to delete it
+- View your complete item list with an automatic count
+- Click the "×" button next to any item to delete it
 - Your changes are saved automatically
 
 ## Project Structure 📁
@@ -90,7 +92,7 @@ Works in all modern browsers:
 
 - Case-insensitive matching
 - Accent-insensitive comparison
-- Prevents adding the same movie twice
+- Prevents adding the same item twice under the same tag
 
 ### Data Persistence
 

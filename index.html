@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Watch Later</title>
+    <title>Danh sách chờ</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
@@ -13,16 +13,21 @@
         <header>
             <div>
                 <p class="eyebrow">Danh sách của bạn</p>
-                <h1>Watch Later</h1>
+                <h1>Danh sách chờ</h1>
             </div>
         </header>
 
         <section class="card">
             <h2>Thêm nhanh</h2>
             <form id="single-form" class="stack" autocomplete="off">
-                <label for="single-input">Tên phim</label>
+                <label for="single-input">Tên mục</label>
                 <div class="row">
                     <input id="single-input" name="single" type="text" placeholder="Ví dụ: The Matrix" required />
+                    <select id="single-tag" name="single-tag" aria-label="Chọn tag cho mục vừa nhập">
+                        <option value="game">Game</option>
+                        <option value="movie" selected>Movie</option>
+                        <option value="comic">Comic</option>
+                    </select>
                     <button type="submit">Thêm</button>
                 </div>
                 <p id="single-feedback" role="status" aria-live="polite"></p>
@@ -32,9 +37,14 @@
         <section class="card">
             <h2>Nhập nhiều</h2>
             <form id="bulk-form" class="stack">
-                <label for="bulk-input">Nhập mỗi dòng một phim hoặc ngăn cách bằng dấu phẩy.</label>
-                <textarea id="bulk-input" name="bulk" rows="5" placeholder="Breaking Bad\nSpirited Away\nInception"></textarea>
+                <label for="bulk-input">Nhập mỗi dòng một mục hoặc ngăn cách bằng dấu phẩy.</label>
+                <textarea id="bulk-input" name="bulk" rows="5" placeholder="Zelda\nSpirited Away\nSaga of Tanya the Evil"></textarea>
                 <div class="row">
+                    <select id="bulk-tag" name="bulk-tag" aria-label="Chọn tag cho các mục vừa nhập">
+                        <option value="game">Game</option>
+                        <option value="movie" selected>Movie</option>
+                        <option value="comic">Comic</option>
+                    </select>
                     <button type="submit">Thêm tất cả</button>
                     <span class="subtle">* Phần tổng kết sẽ cho biết đã thêm bao nhiêu và mục nào bị bỏ qua.</span>
                 </div>
@@ -44,10 +54,10 @@
 
         <section class="card list-card">
             <div class="list-header">
-                <h2>Danh sách phim</h2>
-                <p class="count"><span id="movie-count">0</span> phim</p>
+                <h2>Danh sách mục</h2>
+                <p class="count"><span id="movie-count">0</span> mục</p>
             </div>
-            <div id="empty-state" class="empty">Chưa có phim nào, hãy thêm phim đầu tiên!</div>
+            <div id="empty-state" class="empty">Chưa có mục nào, hãy thêm mục đầu tiên!</div>
             <ul id="movie-list"></ul>
         </section>
     </main>
@@ -56,7 +66,8 @@
         <li class="movie-row">
             <span class="index"></span>
             <span class="title"></span>
-            <button class="delete" type="button" aria-label="Xóa phim">
+            <span class="tag"></span>
+            <button class="delete" type="button" aria-label="Xóa mục">
                 <span aria-hidden="true">×</span>
             </button>
         </li>
