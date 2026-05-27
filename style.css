@@ -14,16 +14,55 @@
     box-sizing: border-box;
 }
 
+html {
+    background: var(--bg);
+}
+
 body {
     margin: 0;
     min-height: 100vh;
-    background: radial-gradient(circle at 20% 20%, rgba(79, 140, 255, 0.2), transparent 45%),
-        radial-gradient(circle at 80% 0%, rgba(255, 107, 107, 0.15), transparent 40%),
-        var(--bg);
+    background: var(--bg);
     color: var(--text);
     display: flex;
     justify-content: center;
     padding: 40px 16px 80px;
+    position: relative;
+    overflow-x: hidden;
+    isolation: isolate;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(79, 140, 255, 0.22), transparent 42%),
+        radial-gradient(circle at 80% 0%, rgba(255, 107, 107, 0.16), transparent 38%),
+        radial-gradient(circle at 50% 100%, rgba(125, 216, 125, 0.12), transparent 36%),
+        linear-gradient(135deg, #090b10 0%, #121827 50%, #0b0d11 100%);
+    background-size: 140% 140%, 140% 140%, 160% 160%, 200% 200%;
+    background-position: 0% 0%, 100% 0%, 50% 100%, 0% 50%;
+    animation: background-drift 18s ease-in-out infinite alternate;
+    transform: scale(1.1);
+    will-change: background-position, transform;
+}
+
+@keyframes background-drift {
+    0% {
+        background-position: 0% 0%, 100% 0%, 50% 100%, 0% 50%;
+        transform: scale(1.08) translate3d(0, 0, 0);
+    }
+
+    50% {
+        background-position: 50% 20%, 70% 30%, 40% 70%, 60% 40%;
+        transform: scale(1.12) translate3d(0, -6px, 0);
+    }
+
+    100% {
+        background-position: 100% 0%, 0% 100%, 55% 45%, 100% 50%;
+        transform: scale(1.1) translate3d(0, 0, 0);
+    }
 }
 
 main.app {
