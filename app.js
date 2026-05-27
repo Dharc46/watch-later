@@ -12,13 +12,15 @@ const STORAGE_KEY = "watchLaterMovies";
 const TAG_OPTIONS = [
     { value: "game", label: "Game" },
     { value: "movie", label: "Movie" },
+    { value: "app", label: "App" },
     { value: "comic", label: "Comic" },
 ];
 const DEFAULT_TAG = "movie";
 const TAG_ORDER = {
     game: 0,
     movie: 1,
-    comic: 2,
+    app: 2,
+    comic: 3,
 };
 
 const collapseSpaces = (text) => text.trim().replace(/\s+/g, " ");

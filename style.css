@@ -288,6 +288,12 @@ button:active {
     color: #b7ecb7;
 }
 
+.movie-row .tag.tag--app {
+    background: rgba(155, 120, 255, 0.18);
+    border-color: rgba(155, 120, 255, 0.38);
+    color: #d7c9ff;
+}
+
 .movie-row .tag.tag--comic {
     background: rgba(255, 192, 92, 0.18);
     border-color: rgba(255, 192, 92, 0.42);
