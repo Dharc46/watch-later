@@ -6,6 +6,7 @@ A simple and elegant web application for managing your game, movie, and comic ba
 
 - **Quick Add**: Add items one at a time with instant validation and a tag selector
 - **Bulk Import**: Add multiple items at once (separated by new lines or commas) with a summary of what was added or skipped
+- **Export / Import**: Download your list as JSON and restore it in another browser or device
 - **Smart Formatting**: Automatically formats item titles to title case with proper Vietnamese locale support
 - **URL Cleanup**: Removes stray links from pasted text and can extract titles or IDs from supported links
 - **Duplicate Detection**: Prevents the same item with the same tag from being added twice
@@ -99,6 +100,7 @@ Works in all modern browsers:
 - Uses browser localStorage
 - Automatically saves on every change
 - Loads your list when you return
+- Exports and imports a versioned JSON file for moving data between browsers
 
 ## Customization 🎨
 

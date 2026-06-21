@@ -4,10 +4,19 @@ const singleFeedback = document.getElementById("single-feedback");
 const bulkForm = document.getElementById("bulk-form");
 const bulkInput = document.getElementById("bulk-input");
 const bulkFeedback = document.getElementById("bulk-feedback");
+const exportButton = document.getElementById("export-button");
+const importButton = document.getElementById("import-button");
+const importInput = document.getElementById("import-file");
+const transferFeedback = document.getElementById("transfer-feedback");
 const listEl = document.getElementById("movie-list");
 const emptyStateEl = document.getElementById("empty-state");
 const countEl = document.getElementById("movie-count");
 const template = document.getElementById("movie-row-template");
+const labelDialog = document.getElementById("label-dialog");
+const labelOptionsEl = document.getElementById("label-options");
+const labelOptionButtons = [...labelOptionsEl.querySelectorAll(".label-option")];
+const pendingItemTitleEl = document.getElementById("pending-item-title");
+const labelDialogCancel = document.getElementById("label-dialog-cancel");
 const STORAGE_KEY = "watchLaterMovies";
 const TAG_OPTIONS = [
     { value: "game", label: "Game" },
@@ -91,6 +100,26 @@ const state = {
     items: [],
 };
 
+let pendingSingleTitle = "";
+let selectedLabelIndex = TAG_OPTIONS.findIndex((option) => option.value === DEFAULT_TAG);
+
+const normalizeStoredItem = (item) => {
+    if (typeof item === "string") {
+        const title = toTitleCase(item);
+        return title ? { title, tag: DEFAULT_TAG } : null;
+    }
+
+    if (!item || typeof item !== "object") return null;
+
+    const title = typeof item.title === "string" ? toTitleCase(item.title) : "";
+    if (!title) return null;
+
+    return {
+        title,
+        tag: normalizeTag(item.tag),
+    };
+};
+
 const persistState = () => {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
@@ -105,24 +134,7 @@ const hydrateState = () => {
         if (!raw) return;
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-            state.items = parsed
-                .map((item) => {
-                    if (typeof item === "string") {
-                        const title = toTitleCase(item);
-                        return title ? { title, tag: DEFAULT_TAG } : null;
-                    }
-
-                    if (!item || typeof item !== "object") return null;
-
-                    const title = typeof item.title === "string" ? toTitleCase(item.title) : "";
-                    if (!title) return null;
-
-                    return {
-                        title,
-                        tag: normalizeTag(item.tag),
-                    };
-                })
-                .filter(Boolean);
+            state.items = parsed.map(normalizeStoredItem).filter(Boolean);
             sortItems();
         }
     } catch (error) {
@@ -195,6 +207,63 @@ const addItem = (title, tag, { silent = false } = {}) => {
     return { status: "added" };
 };
 
+const createExportPayload = () => ({
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    items: state.items.map((item) => ({
+        title: item.title,
+        tag: normalizeTag(item.tag),
+    })),
+});
+
+const downloadJsonFile = (filename, data) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+};
+
+const importItems = (items) => {
+    const incoming = Array.isArray(items) ? items.map(normalizeStoredItem).filter(Boolean) : [];
+    if (incoming.length === 0) {
+        return { addedCount: 0, duplicateCount: 0, invalidCount: 0 };
+    }
+
+    const existingKeys = new Set(
+        state.items.map((item) => `${normalizeTitle(item.title)}|${normalizeTag(item.tag)}`)
+    );
+    let addedCount = 0;
+    let duplicateCount = 0;
+
+    incoming.forEach((item) => {
+        const key = `${normalizeTitle(item.title)}|${normalizeTag(item.tag)}`;
+        if (existingKeys.has(key)) {
+            duplicateCount += 1;
+            return;
+        }
+
+        existingKeys.add(key);
+        state.items.push({ title: item.title, tag: normalizeTag(item.tag) });
+        addedCount += 1;
+    });
+
+    sortItems();
+    renderList();
+    persistState();
+
+    return { addedCount, duplicateCount, invalidCount: 0 };
+};
+
+const setTransferFeedback = (message, type) => {
+    transferFeedback.textContent = message;
+    transferFeedback.className = type ? type : "";
+};
+
 const setBulkFeedback = (message, type) => {
     bulkFeedback.textContent = message;
     bulkFeedback.className = type ? type : "";
@@ -217,11 +286,132 @@ const setFeedback = (message, type) => {
     singleFeedback.className = type ? type : "";
 };
 
+const updateLabelSelection = (nextIndex, { focus = true } = {}) => {
+    selectedLabelIndex = (nextIndex + labelOptionButtons.length) % labelOptionButtons.length;
+    labelOptionButtons.forEach((button, index) => {
+        const selected = index === selectedLabelIndex;
+        button.classList.toggle("is-selected", selected);
+        button.setAttribute("aria-selected", selected.toString());
+        button.tabIndex = selected ? 0 : -1;
+    });
+
+    if (focus) labelOptionButtons[selectedLabelIndex].focus();
+};
+
+const closeLabelDialog = () => {
+    pendingSingleTitle = "";
+    labelDialog.close();
+    singleInput.focus();
+};
+
+const choosePendingLabel = (tag) => {
+    if (!pendingSingleTitle) return;
+    const title = pendingSingleTitle;
+    pendingSingleTitle = "";
+    labelDialog.close();
+    const result = addItem(title, tag);
+    if (result.status === "added") singleInput.value = "";
+    singleInput.focus();
+};
+
+const openLabelDialog = (title) => {
+    pendingSingleTitle = title;
+    pendingItemTitleEl.textContent = toTitleCase(title);
+    setFeedback("", "");
+    labelDialog.showModal();
+    updateLabelSelection(TAG_OPTIONS.findIndex((option) => option.value === DEFAULT_TAG));
+};
+
+exportButton.addEventListener("click", () => {
+    const exportData = createExportPayload();
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadJsonFile(`watch-later-${stamp}.json`, exportData);
+    setTransferFeedback("Đã xuất dữ liệu JSON.", "success");
+});
+
+importButton.addEventListener("click", () => {
+    importInput.click();
+});
+
+importInput.addEventListener("change", async () => {
+    const [file] = importInput.files || [];
+    importInput.value = "";
+
+    if (!file) return;
+
+    try {
+        const raw = await file.text();
+        const parsed = JSON.parse(raw);
+        const payloadItems = Array.isArray(parsed)
+            ? parsed
+            : Array.isArray(parsed?.items)
+                ? parsed.items
+                : null;
+
+        if (!payloadItems) {
+            setTransferFeedback("Tệp JSON không đúng định dạng.", "error");
+            return;
+        }
+
+        const result = importItems(payloadItems);
+        if (result.addedCount === 0 && result.duplicateCount > 0) {
+            setTransferFeedback("Không có mục mới nào để nhập.", "error");
+            return;
+        }
+
+        setTransferFeedback(
+            `Đã nhập ${result.addedCount} mục${result.duplicateCount > 0 ? `, bỏ qua ${result.duplicateCount} mục trùng` : ""}.`,
+            result.addedCount > 0 ? "success" : "error"
+        );
+    } catch (error) {
+        console.error("Không thể nhập dữ liệu từ tệp JSON", error);
+        setTransferFeedback("Không thể đọc tệp JSON.", "error");
+    }
+});
+
 singleForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    addItem(singleInput.value, getSelectedTag("single-tag"));
-    singleInput.value = "";
+    const cleaned = sanitizeInput(singleInput.value);
+    if (!cleaned) {
+        setFeedback("Vui lòng nhập tên mục.", "error");
+        return;
+    }
+    openLabelDialog(cleaned);
 });
+
+labelOptionsEl.addEventListener("click", (event) => {
+    const option = event.target.closest(".label-option");
+    if (option) choosePendingLabel(option.dataset.tag);
+});
+
+labelOptionsEl.addEventListener("mousemove", (event) => {
+    const option = event.target.closest(".label-option");
+    if (!option) return;
+    updateLabelSelection(labelOptionButtons.indexOf(option), { focus: false });
+});
+
+labelDialog.addEventListener("keydown", (event) => {
+    const key = event.key.toLowerCase();
+    if (event.target === labelDialogCancel && key === "enter") return;
+
+    if (key === "arrowdown" || key === "s") {
+        event.preventDefault();
+        updateLabelSelection(selectedLabelIndex + 1);
+    } else if (key === "arrowup" || key === "w") {
+        event.preventDefault();
+        updateLabelSelection(selectedLabelIndex - 1);
+    } else if (key === "enter") {
+        event.preventDefault();
+        choosePendingLabel(labelOptionButtons[selectedLabelIndex].dataset.tag);
+    }
+});
+
+labelDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeLabelDialog();
+});
+
+labelDialogCancel.addEventListener("click", closeLabelDialog);
 
 bulkForm.addEventListener("submit", (event) => {
     event.preventDefault();

@@ -23,12 +23,6 @@
                 <label for="single-input">Tên mục</label>
                 <div class="row">
                     <input id="single-input" name="single" type="text" placeholder="Ví dụ: The Matrix" required />
-                    <select id="single-tag" name="single-tag" aria-label="Chọn tag cho mục vừa nhập">
-                        <option value="game">Game</option>
-                        <option value="movie" selected>Movie</option>
-                        <option value="app">App</option>
-                        <option value="comic">Comic</option>
-                    </select>
                     <button type="submit">Thêm</button>
                 </div>
                 <p id="single-feedback" role="status" aria-live="polite"></p>
@@ -54,6 +48,19 @@
             </form>
         </section>
 
+        <section class="card">
+            <h2>Xuất / nhập</h2>
+            <div class="stack">
+                <p class="subtle">Xuất dữ liệu ra file JSON để chuyển sang trình duyệt khác, hoặc nhập lại file đã lưu.</p>
+                <div class="row">
+                    <button id="export-button" type="button">Xuất JSON</button>
+                    <button id="import-button" class="secondary" type="button">Nhập JSON</button>
+                    <input id="import-file" type="file" accept="application/json,.json" hidden />
+                </div>
+                <p id="transfer-feedback" role="status" aria-live="polite"></p>
+            </div>
+        </section>
+
         <section class="card list-card">
             <div class="list-header">
                 <h2>Danh sách mục</h2>
@@ -74,6 +81,22 @@
             </button>
         </li>
     </template>
+
+    <dialog id="label-dialog" class="label-dialog" aria-labelledby="label-dialog-title">
+        <div class="label-dialog__content">
+            <p class="eyebrow">Chọn nhãn</p>
+            <h2 id="label-dialog-title">Mục này thuộc loại nào?</h2>
+            <p id="pending-item-title" class="pending-item-title"></p>
+            <div id="label-options" class="label-options" role="listbox" aria-label="Nhãn cho mục mới">
+                <button type="button" class="label-option tag--game" data-tag="game" role="option">Game</button>
+                <button type="button" class="label-option tag--movie" data-tag="movie" role="option">Movie</button>
+                <button type="button" class="label-option tag--app" data-tag="app" role="option">App</button>
+                <button type="button" class="label-option tag--comic" data-tag="comic" role="option">Comic</button>
+            </div>
+            <p class="label-dialog__hint">↑/↓ hoặc W/S để di chuyển · Enter để chọn · Esc để hủy</p>
+            <button id="label-dialog-cancel" class="secondary label-dialog__cancel" type="button">Hủy</button>
+        </div>
+    </dialog>
 
     <script src="app.js"></script>
 </body>

@@ -183,6 +183,74 @@ button:active {
     transform: translateY(1px);
 }
 
+button.secondary {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+button.secondary:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.label-dialog {
+    width: min(440px, calc(100% - 32px));
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
+}
+
+.label-dialog::backdrop {
+    background: rgba(4, 6, 10, 0.76);
+    backdrop-filter: blur(5px);
+}
+
+.label-dialog__content { padding: 28px; }
+.label-dialog h2 { margin: 0 0 8px; }
+
+.pending-item-title {
+    margin: 0 0 22px;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.label-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.label-option {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+}
+
+.label-option.is-selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.label-option.tag--game { color: #9fc0ff; }
+.label-option.tag--movie { color: #b7ecb7; }
+.label-option.tag--app { color: #d7c9ff; }
+.label-option.tag--comic { color: #ffd89a; }
+
+.label-dialog__hint {
+    margin: 18px 0 14px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.label-dialog__cancel { width: 100%; }
+
 .subtle {
     color: var(--muted);
     font-size: 0.9rem;
@@ -214,6 +282,21 @@ button:active {
 }
 
 #bulk-feedback.error {
+    color: var(--danger);
+}
+
+#transfer-feedback {
+    min-height: 1.2rem;
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+#transfer-feedback.success {
+    color: #7dd87d;
+}
+
+#transfer-feedback.error {
     color: var(--danger);
 }
 
@@ -339,4 +422,6 @@ button:active {
         width: 100%;
         min-width: 0;
     }
+
+    .label-dialog__content { padding: 22px; }
 }
