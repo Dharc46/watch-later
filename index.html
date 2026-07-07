@@ -40,25 +40,13 @@
                         <option value="movie" selected>Movie</option>
                         <option value="app">App</option>
                         <option value="comic">Comic</option>
+                        <option value="person">Person</option>
                     </select>
                     <button type="submit">Thêm tất cả</button>
                     <span class="subtle">* Phần tổng kết sẽ cho biết đã thêm bao nhiêu và mục nào bị bỏ qua.</span>
                 </div>
                 <p id="bulk-feedback" role="status" aria-live="polite"></p>
             </form>
-        </section>
-
-        <section class="card">
-            <h2>Xuất / nhập</h2>
-            <div class="stack">
-                <p class="subtle">Xuất dữ liệu ra file JSON để chuyển sang trình duyệt khác, hoặc nhập lại file đã lưu.</p>
-                <div class="row">
-                    <button id="export-button" type="button">Xuất JSON</button>
-                    <button id="import-button" class="secondary" type="button">Nhập JSON</button>
-                    <input id="import-file" type="file" accept="application/json,.json" hidden />
-                </div>
-                <p id="transfer-feedback" role="status" aria-live="polite"></p>
-            </div>
         </section>
 
         <section class="card list-card">
@@ -88,10 +76,11 @@
             <h2 id="label-dialog-title">Mục này thuộc loại nào?</h2>
             <p id="pending-item-title" class="pending-item-title"></p>
             <div id="label-options" class="label-options" role="listbox" aria-label="Nhãn cho mục mới">
-                <button type="button" class="label-option tag--game" data-tag="game" role="option">Game</button>
-                <button type="button" class="label-option tag--movie" data-tag="movie" role="option">Movie</button>
                 <button type="button" class="label-option tag--app" data-tag="app" role="option">App</button>
                 <button type="button" class="label-option tag--comic" data-tag="comic" role="option">Comic</button>
+                <button type="button" class="label-option tag--game" data-tag="game" role="option">Game</button>
+                <button type="button" class="label-option tag--movie" data-tag="movie" role="option">Movie</button>
+                <button type="button" class="label-option tag--person" data-tag="person" role="option">Person</button>
             </div>
             <p class="label-dialog__hint">↑/↓ hoặc W/S để di chuyển · Enter để chọn · Esc để hủy</p>
             <button id="label-dialog-cancel" class="secondary label-dialog__cancel" type="button">Hủy</button>

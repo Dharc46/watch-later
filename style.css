@@ -195,7 +195,7 @@ button.secondary:hover {
 }
 
 .label-dialog {
-    width: min(440px, calc(100% - 32px));
+    width: min(300px, calc(100% - 32px));
     padding: 0;
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 18px;
@@ -220,7 +220,7 @@ button.secondary:hover {
 
 .label-options {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 10px;
 }
 
@@ -241,6 +241,7 @@ button.secondary:hover {
 .label-option.tag--movie { color: #b7ecb7; }
 .label-option.tag--app { color: #d7c9ff; }
 .label-option.tag--comic { color: #ffd89a; }
+.label-option.tag--person { color: #ff9ac1; }
 
 .label-dialog__hint {
     margin: 18px 0 14px;
@@ -285,20 +286,6 @@ button.secondary:hover {
     color: var(--danger);
 }
 
-#transfer-feedback {
-    min-height: 1.2rem;
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--muted);
-}
-
-#transfer-feedback.success {
-    color: #7dd87d;
-}
-
-#transfer-feedback.error {
-    color: var(--danger);
-}
 
 .list-card {
     padding: 0;
@@ -357,6 +344,13 @@ button.secondary:hover {
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
+    cursor: pointer;
+}
+
+.movie-row .tag:hover,
+.movie-row .tag:focus-visible {
+    filter: brightness(1.2);
+    outline: none;
 }
 
 .movie-row .tag.tag--game {
@@ -381,6 +375,12 @@ button.secondary:hover {
     background: rgba(255, 192, 92, 0.18);
     border-color: rgba(255, 192, 92, 0.42);
     color: #ffd89a;
+}
+
+.movie-row .tag.tag--person {
+    background: rgba(255, 105, 158, 0.18);
+    border-color: rgba(255, 105, 158, 0.4);
+    color: #ff9ac1;
 }
 
 .movie-row button.delete {

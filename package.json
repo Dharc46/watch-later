@@ -1,0 +1,9 @@
+{
+  "name": "watch-later",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Danh sách chờ - watchlist app với dữ liệu lưu tự động vào file JSON trên máy",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

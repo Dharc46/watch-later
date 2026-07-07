@@ -6,11 +6,10 @@ A simple and elegant web application for managing your game, movie, and comic ba
 
 - **Quick Add**: Add items one at a time with instant validation and a tag selector
 - **Bulk Import**: Add multiple items at once (separated by new lines or commas) with a summary of what was added or skipped
-- **Export / Import**: Download your list as JSON and restore it in another browser or device
 - **Smart Formatting**: Automatically formats item titles to title case with proper Vietnamese locale support
 - **URL Cleanup**: Removes stray links from pasted text and can extract titles or IDs from supported links
 - **Duplicate Detection**: Prevents the same item with the same tag from being added twice
-- **Persistent Storage**: Your watchlist is saved automatically to browser localStorage
+- **Automatic File Storage**: Every change is saved instantly to a JSON database file (`data/watchlist.json`) in the project folder — no manual save/export step needed
 - **Sorted List**: Movies are automatically sorted alphabetically
 - **Dark Theme**: Modern dark UI with smooth gradients
 - **Responsive Design**: Works perfectly on desktop and mobile devices
@@ -19,8 +18,10 @@ A simple and elegant web application for managing your game, movie, and comic ba
 ## How to Use 🚀
 
 1. **Clone or download** this repository to your local machine
-2. **Open** `index.html` in your web browser
+2. **Run the server**: `npm start` (or `node server.js`), then open `http://localhost:3000` in your browser
 3. **Start adding items!**
+
+The app needs the small Node server running because it writes your watchlist straight to a JSON file (`data/watchlist.json`) in the project folder — opening `index.html` directly (`file://`) won't be able to save.
 
 ### Adding Movies
 
@@ -58,14 +59,17 @@ Examples:
 watch-later/
 ├── index.html      # HTML structure and layout
 ├── style.css       # Styling and design
-├── app.js          # JavaScript logic and functionality
+├── app.js          # Frontend logic and functionality
+├── server.js       # Node static + API server (reads/writes data/watchlist.json)
+├── package.json    # npm start script
+├── data/           # Auto-created; watchlist.json lives here (gitignored)
 └── README.md       # This file
 ```
 
 ## Technical Details 🛠️
 
-- **Language**: Vanilla JavaScript (no frameworks)
-- **Storage**: Browser localStorage API
+- **Language**: Vanilla JavaScript (no frameworks), Node.js (built-in `http`/`fs` only, no dependencies)
+- **Storage**: JSON file (`data/watchlist.json`) written by the Node server on every change
 - **Styling**: Custom CSS with modern design patterns
 - **Accessibility**: Semantic HTML with ARIA labels
 - **Localization**: Vietnamese locale support (vi-VN)
@@ -97,10 +101,9 @@ Works in all modern browsers:
 
 ### Data Persistence
 
-- Uses browser localStorage
-- Automatically saves on every change
-- Loads your list when you return
-- Exports and imports a versioned JSON file for moving data between browsers
+- Every add, edit, or delete sends the full list to the server, which writes it to `data/watchlist.json`
+- Loads your list from that file when you return, from any browser
+- No export/import step or browser storage involved — the file itself is your backup
 
 ## Customization 🎨
 
@@ -119,7 +122,7 @@ Feel free to use this project for personal or commercial purposes.
 - Use comma-separated values or new lines when bulk importing
 - Movie titles are automatically formatted consistently
 - Refresh the page - your list will still be there!
-- Clear your browser's localStorage if you want to start fresh
+- Delete `data/watchlist.json` (or empty its array) if you want to start fresh
 
 ---
 

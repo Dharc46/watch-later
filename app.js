@@ -4,25 +4,24 @@ const singleFeedback = document.getElementById("single-feedback");
 const bulkForm = document.getElementById("bulk-form");
 const bulkInput = document.getElementById("bulk-input");
 const bulkFeedback = document.getElementById("bulk-feedback");
-const exportButton = document.getElementById("export-button");
-const importButton = document.getElementById("import-button");
-const importInput = document.getElementById("import-file");
-const transferFeedback = document.getElementById("transfer-feedback");
 const listEl = document.getElementById("movie-list");
 const emptyStateEl = document.getElementById("empty-state");
 const countEl = document.getElementById("movie-count");
 const template = document.getElementById("movie-row-template");
 const labelDialog = document.getElementById("label-dialog");
+const labelDialogTitleEl = document.getElementById("label-dialog-title");
 const labelOptionsEl = document.getElementById("label-options");
 const labelOptionButtons = [...labelOptionsEl.querySelectorAll(".label-option")];
 const pendingItemTitleEl = document.getElementById("pending-item-title");
 const labelDialogCancel = document.getElementById("label-dialog-cancel");
-const STORAGE_KEY = "watchLaterMovies";
+const ITEMS_API_URL = "/api/items";
+const LAST_TAG_STORAGE_KEY = "watchLaterLastTag";
 const TAG_OPTIONS = [
     { value: "game", label: "Game" },
     { value: "movie", label: "Movie" },
     { value: "app", label: "App" },
     { value: "comic", label: "Comic" },
+    { value: "person", label: "Person" },
 ];
 const DEFAULT_TAG = "movie";
 const TAG_ORDER = {
@@ -30,6 +29,7 @@ const TAG_ORDER = {
     movie: 1,
     app: 2,
     comic: 3,
+    person: 4,
 };
 
 const collapseSpaces = (text) => text.trim().replace(/\s+/g, " ");
@@ -101,7 +101,15 @@ const state = {
 };
 
 let pendingSingleTitle = "";
-let selectedLabelIndex = TAG_OPTIONS.findIndex((option) => option.value === DEFAULT_TAG);
+let pendingEditItem = null;
+let lastSelectedTag = DEFAULT_TAG;
+
+const findLabelOptionIndex = (tag) => {
+    const index = labelOptionButtons.findIndex((button) => button.dataset.tag === tag);
+    return index === -1 ? 0 : index;
+};
+
+let selectedLabelIndex = findLabelOptionIndex(DEFAULT_TAG);
 
 const normalizeStoredItem = (item) => {
     if (typeof item === "string") {
@@ -121,24 +129,42 @@ const normalizeStoredItem = (item) => {
 };
 
 const persistState = () => {
+    fetch(ITEMS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state.items),
+    }).catch((error) => {
+        console.error("Không thể lưu dữ liệu vào file database trên server", error);
+    });
+};
+
+const persistLastSelectedTag = (tag) => {
+    lastSelectedTag = normalizeTag(tag);
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
+        localStorage.setItem(LAST_TAG_STORAGE_KEY, lastSelectedTag);
     } catch (error) {
-        console.error("Không thể lưu dữ liệu vào localStorage", error);
+        console.error("KhÃ´ng thá»ƒ lÆ°u tag Ä‘Ã£ chá»n vÃ o localStorage", error);
     }
 };
 
-const hydrateState = () => {
+const hydrateState = async () => {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
+        const storedTag = localStorage.getItem(LAST_TAG_STORAGE_KEY);
+        if (storedTag) lastSelectedTag = normalizeTag(storedTag);
+    } catch (error) {
+        console.error("Không thể đọc tag đã chọn từ localStorage", error);
+    }
+
+    try {
+        const response = await fetch(ITEMS_API_URL);
+        if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+        const parsed = await response.json();
         if (Array.isArray(parsed)) {
             state.items = parsed.map(normalizeStoredItem).filter(Boolean);
             sortItems();
         }
     } catch (error) {
-        console.error("Không thể đọc dữ liệu từ localStorage", error);
+        console.error("Không thể đọc dữ liệu từ file database trên server", error);
     }
 };
 
@@ -171,6 +197,11 @@ const renderList = () => {
         const tagEl = clone.querySelector(".tag");
         tagEl.textContent = formatTag(item.tag);
         tagEl.classList.add(`tag--${normalizeTag(item.tag)}`);
+        tagEl.dataset.title = item.title;
+        tagEl.dataset.tag = normalizeTag(item.tag);
+        tagEl.setAttribute("role", "button");
+        tagEl.tabIndex = 0;
+        tagEl.setAttribute("aria-label", `Sửa nhãn của ${item.title}`);
         const deleteBtn = clone.querySelector(".delete");
         deleteBtn.dataset.title = item.title;
         deleteBtn.dataset.tag = normalizeTag(item.tag);
@@ -205,63 +236,6 @@ const addItem = (title, tag, { silent = false } = {}) => {
 
     if (!silent) setFeedback("Đã thêm thành công!", "success");
     return { status: "added" };
-};
-
-const createExportPayload = () => ({
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    items: state.items.map((item) => ({
-        title: item.title,
-        tag: normalizeTag(item.tag),
-    })),
-});
-
-const downloadJsonFile = (filename, data) => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-};
-
-const importItems = (items) => {
-    const incoming = Array.isArray(items) ? items.map(normalizeStoredItem).filter(Boolean) : [];
-    if (incoming.length === 0) {
-        return { addedCount: 0, duplicateCount: 0, invalidCount: 0 };
-    }
-
-    const existingKeys = new Set(
-        state.items.map((item) => `${normalizeTitle(item.title)}|${normalizeTag(item.tag)}`)
-    );
-    let addedCount = 0;
-    let duplicateCount = 0;
-
-    incoming.forEach((item) => {
-        const key = `${normalizeTitle(item.title)}|${normalizeTag(item.tag)}`;
-        if (existingKeys.has(key)) {
-            duplicateCount += 1;
-            return;
-        }
-
-        existingKeys.add(key);
-        state.items.push({ title: item.title, tag: normalizeTag(item.tag) });
-        addedCount += 1;
-    });
-
-    sortItems();
-    renderList();
-    persistState();
-
-    return { addedCount, duplicateCount, invalidCount: 0 };
-};
-
-const setTransferFeedback = (message, type) => {
-    transferFeedback.textContent = message;
-    transferFeedback.className = type ? type : "";
 };
 
 const setBulkFeedback = (message, type) => {
@@ -300,74 +274,62 @@ const updateLabelSelection = (nextIndex, { focus = true } = {}) => {
 
 const closeLabelDialog = () => {
     pendingSingleTitle = "";
+    pendingEditItem = null;
     labelDialog.close();
     singleInput.focus();
 };
 
 const choosePendingLabel = (tag) => {
+    if (pendingEditItem) {
+        const item = pendingEditItem;
+        const normalizedTag = normalizeTag(tag);
+        const duplicate = state.items.some(
+            (entry) =>
+                entry !== item &&
+                normalizeTitle(entry.title) === normalizeTitle(item.title) &&
+                normalizeTag(entry.tag) === normalizedTag
+        );
+        pendingEditItem = null;
+        labelDialog.close();
+        if (duplicate) {
+            setFeedback("Mục này đã có trong danh sách với nhãn đó.", "error");
+            return;
+        }
+        item.tag = normalizedTag;
+        sortItems();
+        renderList();
+        persistState();
+        return;
+    }
+
     if (!pendingSingleTitle) return;
     const title = pendingSingleTitle;
+    persistLastSelectedTag(tag);
     pendingSingleTitle = "";
     labelDialog.close();
-    const result = addItem(title, tag);
-    if (result.status === "added") singleInput.value = "";
+    const result = addItem(title, lastSelectedTag);
+    if (result.status === "added" || result.status === "duplicate") {
+        singleInput.value = "";
+    }
     singleInput.focus();
 };
 
 const openLabelDialog = (title) => {
     pendingSingleTitle = title;
+    labelDialogTitleEl.textContent = "Mục này thuộc loại nào?";
     pendingItemTitleEl.textContent = toTitleCase(title);
     setFeedback("", "");
     labelDialog.showModal();
-    updateLabelSelection(TAG_OPTIONS.findIndex((option) => option.value === DEFAULT_TAG));
+    updateLabelSelection(findLabelOptionIndex(lastSelectedTag));
 };
 
-exportButton.addEventListener("click", () => {
-    const exportData = createExportPayload();
-    const stamp = new Date().toISOString().slice(0, 10);
-    downloadJsonFile(`watch-later-${stamp}.json`, exportData);
-    setTransferFeedback("Đã xuất dữ liệu JSON.", "success");
-});
-
-importButton.addEventListener("click", () => {
-    importInput.click();
-});
-
-importInput.addEventListener("change", async () => {
-    const [file] = importInput.files || [];
-    importInput.value = "";
-
-    if (!file) return;
-
-    try {
-        const raw = await file.text();
-        const parsed = JSON.parse(raw);
-        const payloadItems = Array.isArray(parsed)
-            ? parsed
-            : Array.isArray(parsed?.items)
-                ? parsed.items
-                : null;
-
-        if (!payloadItems) {
-            setTransferFeedback("Tệp JSON không đúng định dạng.", "error");
-            return;
-        }
-
-        const result = importItems(payloadItems);
-        if (result.addedCount === 0 && result.duplicateCount > 0) {
-            setTransferFeedback("Không có mục mới nào để nhập.", "error");
-            return;
-        }
-
-        setTransferFeedback(
-            `Đã nhập ${result.addedCount} mục${result.duplicateCount > 0 ? `, bỏ qua ${result.duplicateCount} mục trùng` : ""}.`,
-            result.addedCount > 0 ? "success" : "error"
-        );
-    } catch (error) {
-        console.error("Không thể nhập dữ liệu từ tệp JSON", error);
-        setTransferFeedback("Không thể đọc tệp JSON.", "error");
-    }
-});
+const openEditLabelDialog = (item) => {
+    pendingEditItem = item;
+    labelDialogTitleEl.textContent = "Đổi nhãn cho mục này?";
+    pendingItemTitleEl.textContent = toTitleCase(item.title);
+    labelDialog.showModal();
+    updateLabelSelection(findLabelOptionIndex(normalizeTag(item.tag)));
+};
 
 singleForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -394,10 +356,10 @@ labelDialog.addEventListener("keydown", (event) => {
     const key = event.key.toLowerCase();
     if (event.target === labelDialogCancel && key === "enter") return;
 
-    if (key === "arrowdown" || key === "s") {
+    if (key === "arrowdown" || key === "arrowright" || key === "s" || key === "d") {
         event.preventDefault();
         updateLabelSelection(selectedLabelIndex + 1);
-    } else if (key === "arrowup" || key === "w") {
+    } else if (key === "arrowup" || key === "arrowleft" || key === "w" || key === "a") {
         event.preventDefault();
         updateLabelSelection(selectedLabelIndex - 1);
     } else if (key === "enter") {
@@ -460,12 +422,38 @@ bulkForm.addEventListener("submit", (event) => {
     setBulkFeedback(parts.join(". ") + ".", addedCount > 0 ? "success" : "error");
 });
 
+const findItemByTagEl = (tagTarget) =>
+    state.items.find(
+        (entry) => entry.title === tagTarget.dataset.title && normalizeTag(entry.tag) === tagTarget.dataset.tag
+    );
+
 listEl.addEventListener("click", (event) => {
     if (event.target.closest("button.delete")) {
         const btn = event.target.closest("button.delete");
         removeItem(btn.dataset.title, btn.dataset.tag);
+        return;
+    }
+
+    const tagTarget = event.target.closest(".tag");
+    if (tagTarget) {
+        const item = findItemByTagEl(tagTarget);
+        if (item) openEditLabelDialog(item);
     }
 });
 
-hydrateState();
-renderList();
+listEl.addEventListener("keydown", (event) => {
+    const key = event.key.toLowerCase();
+    if (key !== "enter" && key !== " ") return;
+    const tagTarget = event.target.closest(".tag");
+    if (!tagTarget) return;
+    event.preventDefault();
+    const item = findItemByTagEl(tagTarget);
+    if (item) openEditLabelDialog(item);
+});
+
+const init = async () => {
+    await hydrateState();
+    renderList();
+};
+
+init();
