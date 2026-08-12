@@ -241,6 +241,8 @@ button.secondary:hover {
 .label-option.tag--movie { color: #b7ecb7; }
 .label-option.tag--app { color: #d7c9ff; }
 .label-option.tag--comic { color: #ffd89a; }
+.label-option.tag--anime { color: #7fe3d6; }
+.label-option.tag--cartoon { color: #ffe066; }
 .label-option.tag--person { color: #ff9ac1; }
 
 .label-dialog__hint {
@@ -375,6 +377,18 @@ button.secondary:hover {
     background: rgba(255, 192, 92, 0.18);
     border-color: rgba(255, 192, 92, 0.42);
     color: #ffd89a;
+}
+
+.movie-row .tag.tag--anime {
+    background: rgba(90, 220, 200, 0.18);
+    border-color: rgba(90, 220, 200, 0.4);
+    color: #7fe3d6;
+}
+
+.movie-row .tag.tag--cartoon {
+    background: rgba(255, 224, 102, 0.18);
+    border-color: rgba(255, 224, 102, 0.4);
+    color: #ffe066;
 }
 
 .movie-row .tag.tag--person {

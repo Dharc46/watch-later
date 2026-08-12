@@ -21,6 +21,8 @@ const TAG_OPTIONS = [
     { value: "movie", label: "Movie" },
     { value: "app", label: "App" },
     { value: "comic", label: "Comic" },
+    { value: "anime", label: "Anime" },
+    { value: "cartoon", label: "Cartoon" },
     { value: "person", label: "Person" },
 ];
 const DEFAULT_TAG = "movie";
@@ -29,7 +31,9 @@ const TAG_ORDER = {
     movie: 1,
     app: 2,
     comic: 3,
-    person: 4,
+    anime: 4,
+    cartoon: 5,
+    person: 6,
 };
 
 const collapseSpaces = (text) => text.trim().replace(/\s+/g, " ");
