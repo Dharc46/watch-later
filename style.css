@@ -239,11 +239,15 @@ button.secondary:hover {
 
 .label-option.tag--game { color: #9fc0ff; }
 .label-option.tag--movie { color: #b7ecb7; }
+.label-option.tag--tv-series { color: #7fc8f8; }
 .label-option.tag--app { color: #d7c9ff; }
 .label-option.tag--comic { color: #ffd89a; }
+.label-option.tag--manga { color: #a5b4fc; }
 .label-option.tag--anime { color: #7fe3d6; }
 .label-option.tag--cartoon { color: #ffe066; }
 .label-option.tag--person { color: #ff9ac1; }
+.label-option.tag--hentai-truyen { color: #ff4d6d; }
+.label-option.tag--hentai-hoathinh { color: #ff8fa3; }
 
 .label-dialog__hint {
     margin: 18px 0 14px;
@@ -367,6 +371,12 @@ button.secondary:hover {
     color: #b7ecb7;
 }
 
+.movie-row .tag.tag--tv-series {
+    background: rgba(127, 200, 248, 0.18);
+    border-color: rgba(127, 200, 248, 0.4);
+    color: #7fc8f8;
+}
+
 .movie-row .tag.tag--app {
     background: rgba(155, 120, 255, 0.18);
     border-color: rgba(155, 120, 255, 0.38);
@@ -377,6 +387,12 @@ button.secondary:hover {
     background: rgba(255, 192, 92, 0.18);
     border-color: rgba(255, 192, 92, 0.42);
     color: #ffd89a;
+}
+
+.movie-row .tag.tag--manga {
+    background: rgba(165, 180, 252, 0.18);
+    border-color: rgba(165, 180, 252, 0.4);
+    color: #a5b4fc;
 }
 
 .movie-row .tag.tag--anime {
@@ -395,6 +411,18 @@ button.secondary:hover {
     background: rgba(255, 105, 158, 0.18);
     border-color: rgba(255, 105, 158, 0.4);
     color: #ff9ac1;
+}
+
+.movie-row .tag.tag--hentai-truyen {
+    background: rgba(255, 77, 109, 0.18);
+    border-color: rgba(255, 77, 109, 0.4);
+    color: #ff4d6d;
+}
+
+.movie-row .tag.tag--hentai-hoathinh {
+    background: rgba(255, 143, 163, 0.18);
+    border-color: rgba(255, 143, 163, 0.4);
+    color: #ff8fa3;
 }
 
 .movie-row button.delete {

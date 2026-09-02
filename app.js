@@ -19,21 +19,29 @@ const LAST_TAG_STORAGE_KEY = "watchLaterLastTag";
 const TAG_OPTIONS = [
     { value: "game", label: "Game" },
     { value: "movie", label: "Movie" },
+    { value: "tv-series", label: "TV Series" },
     { value: "app", label: "App" },
     { value: "comic", label: "Comic" },
+    { value: "manga", label: "Manga" },
     { value: "anime", label: "Anime" },
     { value: "cartoon", label: "Cartoon" },
     { value: "person", label: "Person" },
+    { value: "hentai-truyen", label: "Hentai (Truyện)" },
+    { value: "hentai-hoathinh", label: "Hentai (Hoạt Hình)" },
 ];
 const DEFAULT_TAG = "movie";
 const TAG_ORDER = {
     game: 0,
     movie: 1,
-    app: 2,
-    comic: 3,
-    anime: 4,
-    cartoon: 5,
-    person: 6,
+    "tv-series": 2,
+    app: 3,
+    comic: 4,
+    manga: 5,
+    anime: 6,
+    cartoon: 7,
+    person: 8,
+    "hentai-truyen": 9,
+    "hentai-hoathinh": 10,
 };
 
 const collapseSpaces = (text) => text.trim().replace(/\s+/g, " ");
